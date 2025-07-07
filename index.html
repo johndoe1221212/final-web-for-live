@@ -106,9 +106,6 @@
   <!-- Typing sound effect -->
   <audio id="typing-sound" src="typing-keyboard-asmr-356116.mp3" loop></audio>
 
-  <!-- Hip-hop beat sound effect -->
-  <audio id="hiphop-sound" src="hiphop-beat_130_bpm-341133.mp3" loop></audio>
-
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
@@ -204,17 +201,6 @@
       avatar.style.animation = `${Math.random() < 0.5 ? 'fadeA' : 'pulseA'} 10s ease-in-out infinite`;
     }
 
-    /* -------------------------------------------------- */
-    /* Start Hip-hop music after typing sound finishes   */
-    /* -------------------------------------------------- */
-    function startHiphop() {
-      hiphopSound.play(); // Start hip-hop music when typing is finished
-    }
-
-    function stopHiphop() {
-      hiphopSound.pause(); // Stop hip-hop music when a new comment starts typing
-      hiphopSound.currentTime = 0; // Reset to beginning for next comment
-    }
 
     /* -------------------------------------------------- */
     /* Rendering logic                                    */
