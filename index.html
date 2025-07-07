@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Live‑Chat Overlay (typing only)</title>
+  <title>Live‑Chat Overlay (fade-in/out + typing)</title>
 
   <style>
     html, body {
@@ -133,17 +133,25 @@
         return;
       }
 
-      avatar.src = d.avatar_url || 'default-avatar.jpg';
-      paintUsername(d.author);
-      paintComment(d.text);
+      // Step 1: Hide overlay to trigger fade-in effect
+      overlay.style.opacity = 0;
 
-      requestAnimationFrame(() => {
+      setTimeout(() => {
+        avatar.src = d.avatar_url || 'default-avatar.jpg';
+        paintUsername(d.author);
+        commentEl.textContent = '';
+
+        // Step 2: Fade-in overlay
         overlay.style.opacity = 1;
-      });
+
+        // Step 3: Start typing AFTER fade-in
+        setTimeout(() => {
+          paintComment(d.text);
+        }, 600); // Matches the fade-in duration
+      }, 400); // Brief fade-out before re-showing
     }
 
     db.ref('latestComment').on('value', snap => render(snap.val()));
   </script>
 </body>
 </html>
-
