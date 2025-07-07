@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Live‑Chat Overlay (synced bg)</title>
+  <title>Live‑Chat Overlay (typing only)</title>
 
   <style>
     html, body {
@@ -81,9 +81,8 @@
     </div>
   </div>
 
-  <!-- Local Audio Files -->
+  <!-- Only typing sound -->
   <audio id="typing-sound" src="typing-keyboard-asmr-356116.mp3" loop></audio>
-  <audio id="beat-sound" src="hiphop-beat_130_bpm-341133.mp3" loop></audio>
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -105,8 +104,7 @@
           avatar = document.getElementById('avatar'),
           usernameText = document.getElementById('username-text'),
           commentEl = document.getElementById('comment'),
-          typingSound = document.getElementById('typing-sound'),
-          beatSound = document.getElementById('beat-sound');
+          typingSound = document.getElementById('typing-sound');
 
     function paintUsername(name = 'Anonymous') {
       usernameText.textContent = name;
@@ -116,9 +114,6 @@
       commentEl.textContent = '';
       let i = 0;
 
-      // Start typing sound
-      beatSound.pause();
-      beatSound.currentTime = 0;
       typingSound.currentTime = 0;
       typingSound.play();
 
@@ -128,7 +123,6 @@
         } else {
           clearInterval(typer);
           typingSound.pause();
-          beatSound.play(); // Start beat when typing ends
         }
       }, 50);
     }
