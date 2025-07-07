@@ -3,98 +3,153 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Live‑Chat Overlay</title>
+  <title>Live‑Chat Overlay (synced bg)</title>
 
   <style>
-    html,body{height:100%;margin:0;display:flex;justify-content:center;align-items:center;
-      background:#0d1117;color:#fff;font-family:Arial,sans-serif;overflow:hidden}
-    #overlay{display:flex;align-items:center;gap:22px;padding:48px 54px;max-width:650px;
-      border-radius:18px;background:#0d1117;opacity:0;transition:opacity .6s}
-    #avatar{width:73px;height:73px;border-radius:50%;object-fit:cover}
-    #username{font:700 2.3em 'Trebuchet MS',sans-serif;margin:0 0 4px;
-      animation:rainbow 6s linear infinite}
-    @keyframes rainbow{0%{color:#FF3CAC}14%{color:#784BA0}28%{color:#2B86C5}
-      42%{color:#4EFFB1}56%{color:#FFC300}70%{color:#FF5733}84%{color:#FF33FF}
-      100%{color:#FF3CAC}}
-    #comment{font-size:1.5em;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;
-      -webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+    html, body {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #0d1117;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    #overlay {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      padding: 48px 54px;
+      max-width: 650px;
+      border-radius: 18px;
+      background: #0d1117;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+
+    #avatar {
+      width: 73px;
+      height: 73px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    #content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    #username {
+      font-size: 2.3em;
+      font-weight: bold;
+      font-family: 'Trebuchet MS', sans-serif;
+      margin-bottom: 4px;
+      animation: rainbow 6s linear infinite;
+    }
+
+    @keyframes rainbow {
+      0% { color: #FF3CAC; }
+      14% { color: #784BA0; }
+      28% { color: #2B86C5; }
+      42% { color: #4EFFB1; }
+      56% { color: #FFC300; }
+      70% { color: #FF5733; }
+      84% { color: #FF33FF; }
+      100% { color: #FF3CAC; }
+    }
+
+    #comment {
+      font-size: 1.5em;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: break-word;
+    }
   </style>
 </head>
 <body>
-<div id="overlay">
-  <img id="avatar" src="" alt="avatar">
-  <div id="content">
-    <div id="username"><span id="username-text"></span></div>
-    <div id="comment"></div>
+  <div id="overlay">
+    <img id="avatar" src="" alt="avatar">
+    <div id="content">
+      <div id="username"><span id="username-text"></span></div>
+      <div id="comment"></div>
+    </div>
   </div>
-</div>
 
-<!-- Pre‑autoplay muted: browsers allow this -->
-<audio id="typing" src="typing-keyboard-asmr-356116.mp3" loop muted autoplay playsinline></audio>
-<audio id="beat"   src="hiphop-beat_130_bpm-341133.mp3" loop muted autoplay playsinline></audio>
+  <!-- Local Audio Files -->
+  <audio id="typing-sound" src="typing-keyboard-asmr-356116.mp3" loop></audio>
+  <audio id="beat-sound" src="hiphop-beat_130_bpm-341133.mp3" loop></audio>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-<script>
-/* Firebase init ----------------------------------------------------------- */
-firebase.initializeApp({
-  apiKey:"AIzaSyByubdnNzRNASPIcswGJqNFd45cDWDs-xI",
-  authDomain:"youtuube-43af7.firebaseapp.com",
-  databaseURL:"https://youtuube-43af7-default-rtdb.firebaseio.com",
-  projectId:"youtuube-43af7",
-  storageBucket:"youtuube-43af7.appspot.com",
-  messagingSenderId:"129367990971",
-  appId:"1:129367990971:web:e95b6c464ffe9cef713f9e"
-});
-const db = firebase.database();
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyByubdnNzRNASPIcswGJqNFd45cDWDs-xI",
+      authDomain: "youtuube-43af7.firebaseapp.com",
+      databaseURL: "https://youtuube-43af7-default-rtdb.firebaseio.com",
+      projectId: "youtuube-43af7",
+      storageBucket: "youtuube-43af7.appspot.com",
+      messagingSenderId: "129367990971",
+      appId: "1:129367990971:web:e95b6c464ffe9cef713f9e"
+    });
 
-/* DOM refs ---------------------------------------------------------------- */
-const overlay   = document.getElementById('overlay'),
-      avatar    = document.getElementById('avatar'),
-      userTxt   = document.getElementById('username-text'),
-      commentEl = document.getElementById('comment'),
-      typingSfx = document.getElementById('typing'),
-      beatSfx   = document.getElementById('beat');
+    const db = firebase.database();
 
-/* ensure both tracks ready */
-typingSfx.volume = 1;
-beatSfx.volume   = 1;
-typingSfx.pause();          // start silenced
-beatSfx.pause();
+    const overlay = document.getElementById('overlay'),
+          avatar = document.getElementById('avatar'),
+          usernameText = document.getElementById('username-text'),
+          commentEl = document.getElementById('comment'),
+          typingSound = document.getElementById('typing-sound'),
+          beatSound = document.getElementById('beat-sound');
 
-/* Chat render ------------------------------------------------------------- */
-function paintUsername(name='Anonymous'){ userTxt.textContent=name; }
-
-function paintComment(text=''){
-  commentEl.textContent='';
-  let i=0;
-
-  // switch audio: typing on, beat off
-  beatSfx.pause(); beatSfx.muted=true;
-  typingSfx.currentTime=0; typingSfx.muted=false; typingSfx.play();
-
-  const typer = setInterval(()=>{
-    if(i<text.length){
-      commentEl.textContent += text[i++];
-    }else{
-      clearInterval(typer);
-      // fade typing out, fade beat in
-      typingSfx.muted = true;
-      beatSfx.currentTime=0; beatSfx.muted=false; beatSfx.play();
+    function paintUsername(name = 'Anonymous') {
+      usernameText.textContent = name;
     }
-  },50);
-}
 
-function render(d){
-  if(!d||!d.text){overlay.style.opacity=0;return;}
-  avatar.src = d.avatar_url || 'default-avatar.jpg';
-  paintUsername(d.author); paintComment(d.text);
-  requestAnimationFrame(()=>overlay.style.opacity=1);
-}
+    function paintComment(txt = '') {
+      commentEl.textContent = '';
+      let i = 0;
 
-/* Firebase listener ------------------------------------------------------- */
-db.ref('latestComment').on('value',snap=>render(snap.val()));
-</script>
+      // Start typing sound
+      beatSound.pause();
+      beatSound.currentTime = 0;
+      typingSound.currentTime = 0;
+      typingSound.play();
+
+      const typer = setInterval(() => {
+        if (i < txt.length) {
+          commentEl.textContent += txt[i++];
+        } else {
+          clearInterval(typer);
+          typingSound.pause();
+          beatSound.play(); // Start beat when typing ends
+        }
+      }, 50);
+    }
+
+    function render(d) {
+      if (!d || !d.text) {
+        overlay.style.opacity = 0;
+        return;
+      }
+
+      avatar.src = d.avatar_url || 'default-avatar.jpg';
+      paintUsername(d.author);
+      paintComment(d.text);
+
+      requestAnimationFrame(() => {
+        overlay.style.opacity = 1;
+      });
+    }
+
+    db.ref('latestComment').on('value', snap => render(snap.val()));
+  </script>
 </body>
 </html>
 
