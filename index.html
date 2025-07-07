@@ -132,8 +132,7 @@
           avatar       = document.getElementById('avatar'),
           usernameText = document.getElementById('username-text'),
           commentEl    = document.getElementById('comment'),
-          typingSound  = document.getElementById('typing-sound'), // Typing sound element
-  
+          typingSound  = document.getElementById('typing-sound'); // ✅ FIXED SEMICOLON HERE
 
     /* -------------------------------------------------- */
     /* Emoji logic – show ONE emoji at a time             */
@@ -200,7 +199,6 @@
     function animAvatar() {
       avatar.style.animation = `${Math.random() < 0.5 ? 'fadeA' : 'pulseA'} 10s ease-in-out infinite`;
     }
-
 
     /* -------------------------------------------------- */
     /* Rendering logic                                    */
