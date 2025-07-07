@@ -132,7 +132,7 @@
           avatar       = document.getElementById('avatar'),
           usernameText = document.getElementById('username-text'),
           commentEl    = document.getElementById('comment'),
-          typingSound  = document.getElementById('typing-sound'); // ✅ FIXED SEMICOLON HERE
+          typingSound  = document.getElementById('typing-sound');
 
     /* -------------------------------------------------- */
     /* Emoji logic – show ONE emoji at a time             */
@@ -188,12 +188,11 @@
           commentEl.textContent += txt[i++];
         } else {
           clearInterval(typer);
-          typingSound.pause(); // Stop typing sound when typing is done
-          startHiphop(); // Start hip-hop beat after typing is done
+          typingSound.pause();
         }
       }, 50);
       
-      typingSound.play(); // Start typing sound when typing begins
+      typingSound.play(); 
     }
 
     function animAvatar() {
