@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Live‑Chat Overlay (synced bg)</title>
+
+  <style>
+    :root { --cycle-duration: 10s; }
+
+    html, body {
+      height: 100%; margin: 0;
+      display: flex; justify-content: center; align-items: center;
+      color: #fff; font-family: Arial, Helvetica, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden; background: #0d1117;
+    }
+
+    /* ---- CHAT BUBBLE ---- */
+    #overlay {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      padding: 48px 54px;
+      max-width: 650px;
+      border-radius: 18px;
+      background: #0d1117;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+
+    #overlay::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+    }
+
+    /* avatar */
+    #avatar {
+      width: 73px;
+      height: 73px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    /* content */
+    #content {
+      flex: 1;
+      min-width: 0;
+      position: relative;
+    }
+
+    /* username */
+    #username {
+      display: inline-flex;
+      align-items: center;
+      font-weight: 700;
+      font-size: 2.3em;
+      margin: 0 0 1.4px 0;
+      user-select: none;
+      font-family: 'Trebuchet MS', sans-serif;
+      animation: rainbow 6s linear infinite;
+    }
+
+    @keyframes rainbow {
+      0% { color: #FF3CAC; }
+      14% { color: #784BA0; }
+      28% { color: #2B86C5; }
+      42% { color: #4EFFB1; }
+      56% { color: #FFC300; }
+      70% { color: #FF5733; }
+      84% { color: #FF33FF; }
+      100% { color: #FF3CAC; }
+    }
+
+    /* comment */
+    #comment {
+      font: 400 1.5em/1.5 Arial, Helvetica, sans-serif;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: break-word;
+    }
+
+    /* emojis */
+    .emoji {
+      position: absolute;
+      font-size: 1.4em;
+      opacity: 0;
+      transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <div id="overlay">
+    <img id="avatar" src="" alt="avatar">
+    <div id="content">
+      <div id="username"><span id="username-text"></span></div>
+      <div id="comment"></div>
+    </div>
+  </div>
+
+  <!-- Typing sound effect -->
+  <audio id="typing-sound" src="typing-keyboard-asmr-356116.mp3" loop></audio>
+
+  <!-- Hip-hop beat sound effect -->
+  <audio id="hiphop-sound" src="hiphop-beat_130_bpm-341133.mp3" loop></audio>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script>
+    /* -------------------------------------------------- */
+    /* Firebase setup                                     */
+    /* -------------------------------------------------- */
+    firebase.initializeApp({
+      apiKey: "AIzaSyByubdnNzRNASPIcswGJqNFd45cDWDs-xI",
+      authDomain: "youtuube-43af7.firebaseapp.com",
+      databaseURL: "https://youtuube-43af7-default-rtdb.firebaseio.com",
+      projectId: "youtuube-43af7",
+      storageBucket: "youtuube-43af7.appspot.com",
+      messagingSenderId: "129367990971",
+      appId: "1:129367990971:web:e95b6c464ffe9cef713f9e"
+    });
+
+    const db = firebase.database();
+
+    /* -------------------------------------------------- */
+    /* DOM references                                     */
+    /* -------------------------------------------------- */
+    const overlay      = document.getElementById('overlay'),
+          avatar       = document.getElementById('avatar'),
+          usernameText = document.getElementById('username-text'),
+          commentEl    = document.getElementById('comment'),
+          typingSound  = document.getElementById('typing-sound'), // Typing sound element
+          hiphopSound  = document.getElementById('hiphop-sound'); // Hip-hop sound element
+
+    /* -------------------------------------------------- */
+    /* Emoji logic – show ONE emoji at a time             */
+    /* -------------------------------------------------- */
+    const emojis = ['😂','❤️','💯','🔥','👍','😯','😭','🗿','❤️‍🔥','😎','👀'];
+    let   emojiInterval = null;
+
+    function generateEmoji() {
+      /* remove any existing emoji so only one is visible */
+      document.querySelectorAll('.emoji').forEach(el => el.remove());
+
+      const e = document.createElement('span');
+      e.className  = 'emoji';
+      e.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      document.body.appendChild(e);
+
+      const r = commentEl.getBoundingClientRect();
+      const x = r.left + (Math.random() * 200 - 100);
+      const y = r.bottom + Math.random() * 20;
+
+      e.style.left = `${x}px`;
+      e.style.top  = `${y}px`;
+
+      /* animate in, then out */
+      requestAnimationFrame(() => {
+        e.style.opacity   = 1;
+        e.style.transform = 'scale(1.2)';
+      });
+      setTimeout(() => {
+        e.style.opacity   = 0;
+        e.style.transform = 'scale(0.8)';
+      }, 2000);
+      setTimeout(() => e.remove(), 3000);
+    }
+
+    function startEmojiCycle() {
+      if (emojiInterval) return;               // already running
+      emojiInterval = setInterval(generateEmoji, 3000);
+    }
+
+    /* -------------------------------------------------- */
+    /* Helpers to paint UI                                */
+    /* -------------------------------------------------- */
+    function paintUsername(name='Anonymous') {
+      usernameText.textContent = name;
+    }
+
+    function paintComment(txt='') {
+      commentEl.textContent = '';
+      let i = 0;
+      const typer = setInterval(() => {
+        if (i < txt.length) {
+          commentEl.textContent += txt[i++];
+        } else {
+          clearInterval(typer);
+          fadeOutTypingSound(); // Fade-out typing sound when done
+        }
+      }, 50);
+      
+      typingSound.play(); // Start typing sound when typing begins
+    }
+
+    function animAvatar() {
+      avatar.style.animation = `${Math.random() < 0.5 ? 'fadeA' : 'pulseA'} 10s ease-in-out infinite`;
+    }
+
+    /* -------------------------------------------------- */
+    /* Fade-out Typing Sound and Fade-in Hip-hop Sound   */
+    /* -------------------------------------------------- */
+    function fadeOutTypingSound() {
+      let fadeOutInterval = setInterval(() => {
+        if (typingSound.volume > 0) {
+          typingSound.volume -= 0.05; // Gradually decrease the volume
+        } else {
+          clearInterval(fadeOutInterval);
+          typingSound.pause(); // Stop typing sound after fade out
+          typingSound.volume = 1; // Reset volume for next use
+          startHiphop(); // Start hip-hop music
+        }
+      }, 100);
+    }
+
+    function startHiphop() {
+      hiphopSound.play(); // Start hip-hop music
+      fadeInHiphop(); // Fade-in hip-hop music
+    }
+
+    function fadeInHiphop() {
+      hiphopSound.volume = 0;
+      let fadeInInterval = setInterval(() => {
+        if (hiphopSound.volume < 1) {
+          hiphopSound.volume += 0.05; // Gradually increase the volume
+        } else {
+          clearInterval(fadeInInterval);
+        }
+      }, 100);
+    }
+
+    function stopHiphop() {
+      hiphopSound.pause(); // Stop hip-hop music when a new comment starts typing
+      hiphopSound.currentTime = 0; // Reset to beginning for next comment
+      hiphopSound.volume = 1; // Reset volume for next use
+    }
+
+    /* -------------------------------------------------- */
+    /* Rendering logic                                    */
+    /* -------------------------------------------------- */
+    function render(d) {
+      if (!d || !d.text) {
+        overlay.style.opacity = 0;
+        return;
+      }
+
+      stopHiphop(); // Stop the current hip-hop beat before rendering new comment
+      avatar.src = d.avatar_url || 'default-avatar.jpg';
+      paintUsername(d.author);
+      paintComment(d.text);
+      animAvatar();
+      startEmojiCycle();
+
+      requestAnimationFrame(() => overlay.style.opacity = 1);
+    }
+
+    /* Listen to Firebase */
+    db.ref('latestComment').on('value', snap => render(snap.val()));
+  </script>
+</body> 
+</html>
