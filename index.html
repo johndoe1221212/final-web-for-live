@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Live‑Chat Overlay</title>
+  <title>Live‑Chat Overlay (synced bg)</title>
 
   <style>
     :root { --cycle-duration: 10s; }
@@ -90,7 +90,7 @@
       position: absolute;
       font-size: 1.4em;
       opacity: 0;
-      transition: opacity 2s ease-in-out, transform 1s ease-in-out;
+      transition: opacity 1s ease-in-out, transform 1s ease-in-out;
     }
   </style>
 </head>
@@ -188,11 +188,11 @@
           commentEl.textContent += txt[i++];
         } else {
           clearInterval(typer);
-          typingSound.pause();
+          typingSound.pause(); // Stop typing sound when typing is done
         }
       }, 50);
       
-      typingSound.play(); 
+      typingSound.play(); // Start typing sound when typing begins
     }
 
     function animAvatar() {
@@ -208,7 +208,6 @@
         return;
       }
 
-      
       avatar.src = d.avatar_url || 'default-avatar.jpg';
       paintUsername(d.author);
       paintComment(d.text);
