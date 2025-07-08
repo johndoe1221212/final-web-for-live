@@ -16,7 +16,6 @@
       overflow: hidden; background: #0d1117;
     }
 
-    /* ---- CHAT BUBBLE ---- */
     #overlay {
       position: relative;
       display: flex;
@@ -37,7 +36,6 @@
       border-radius: inherit;
     }
 
-    /* avatar */
     #avatar {
       width: 73px;
       height: 73px;
@@ -45,14 +43,12 @@
       object-fit: cover;
     }
 
-    /* content */
     #content {
       flex: 1;
       min-width: 0;
       position: relative;
     }
 
-    /* username */
     #username {
       display: inline-flex;
       align-items: center;
@@ -75,7 +71,6 @@
       100% { color: #FF3CAC; }
     }
 
-    /* comment */
     #comment {
       font: 400 1.5em/1.5 Arial, Helvetica, sans-serif;
       display: -webkit-box;
@@ -85,7 +80,6 @@
       word-break: break-word;
     }
 
-    /* emojis */
     .emoji {
       position: absolute;
       font-size: 1.4em;
@@ -103,16 +97,17 @@
     </div>
   </div>
 
-  <!-- Typing sound effect -->
-  <audio id="typing-sound" src="typing-keyboard-asmr-356116.mp3" loop></audio>
+  <!-- Background 8-bit music -->
+  <audio id="bg-music" src="8-bit-loop-music-290770.mp3" loop></audio>
+
+  <!-- Ding sound -->
+  <audio id="ding-sound" src="ding-126626.mp3"></audio>
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
   <script>
-    /* -------------------------------------------------- */
-    /* Firebase setup                                     */
-    /* -------------------------------------------------- */
     firebase.initializeApp({
       apiKey: "AIzaSyByubdnNzRNASPIcswGJqNFd45cDWDs-xI",
       authDomain: "youtuube-43af7.firebaseapp.com",
@@ -125,27 +120,21 @@
 
     const db = firebase.database();
 
-    /* -------------------------------------------------- */
-    /* DOM references                                     */
-    /* -------------------------------------------------- */
     const overlay      = document.getElementById('overlay'),
           avatar       = document.getElementById('avatar'),
           usernameText = document.getElementById('username-text'),
           commentEl    = document.getElementById('comment'),
-          typingSound  = document.getElementById('typing-sound');
+          bgMusic      = document.getElementById('bg-music'),
+          dingSound    = document.getElementById('ding-sound');
 
-    /* -------------------------------------------------- */
-    /* Emoji logic – show ONE emoji at a time             */
-    /* -------------------------------------------------- */
     const emojis = ['😂','❤️','💯','🔥','👍','😯','😭','🗿','❤️‍🔥','😎','👀'];
-    let   emojiInterval = null;
+    let emojiInterval = null;
 
     function generateEmoji() {
-      /* remove any existing emoji so only one is visible */
       document.querySelectorAll('.emoji').forEach(el => el.remove());
 
       const e = document.createElement('span');
-      e.className  = 'emoji';
+      e.className = 'emoji';
       e.textContent = emojis[Math.floor(Math.random() * emojis.length)];
       document.body.appendChild(e);
 
@@ -156,7 +145,6 @@
       e.style.left = `${x}px`;
       e.style.top  = `${y}px`;
 
-      /* animate in, then out */
       requestAnimationFrame(() => {
         e.style.opacity   = 1;
         e.style.transform = 'scale(1.2)';
@@ -169,39 +157,50 @@
     }
 
     function startEmojiCycle() {
-      if (emojiInterval) return;               // already running
+      if (emojiInterval) return;
       emojiInterval = setInterval(generateEmoji, 3000);
     }
 
-    /* -------------------------------------------------- */
-    /* Helpers to paint UI                                */
-    /* -------------------------------------------------- */
     function paintUsername(name='Anonymous') {
       usernameText.textContent = name;
+    }
+
+    function fadeVolume(audio, from, to, duration = 500) {
+      const steps = 30;
+      const stepTime = duration / steps;
+      const delta = (to - from) / steps;
+      let current = 0;
+
+      const interval = setInterval(() => {
+        current++;
+        audio.volume = Math.min(1, Math.max(0, from + delta * current));
+        if (current >= steps) clearInterval(interval);
+      }, stepTime);
     }
 
     function paintComment(txt='') {
       commentEl.textContent = '';
       let i = 0;
+
+      // Fade out bg music and play ding
+      fadeVolume(bgMusic, bgMusic.volume, 0.1, 600);
+      dingSound.currentTime = 0;
+      dingSound.play();
+
       const typer = setInterval(() => {
         if (i < txt.length) {
           commentEl.textContent += txt[i++];
         } else {
           clearInterval(typer);
-          typingSound.pause(); // Stop typing sound when typing is done
+          fadeVolume(bgMusic, bgMusic.volume, 1.0, 800); // fade back in
         }
       }, 50);
-      
-      typingSound.play(); // Start typing sound when typing begins
     }
 
     function animAvatar() {
       avatar.style.animation = `${Math.random() < 0.5 ? 'fadeA' : 'pulseA'} 10s ease-in-out infinite`;
     }
 
-    /* -------------------------------------------------- */
-    /* Rendering logic                                    */
-    /* -------------------------------------------------- */
     function render(d) {
       if (!d || !d.text) {
         overlay.style.opacity = 0;
@@ -217,9 +216,16 @@
       requestAnimationFrame(() => overlay.style.opacity = 1);
     }
 
-    /* Listen to Firebase */
+    // Firebase listener
     db.ref('latestComment').on('value', snap => render(snap.val()));
+
+    // Autoplay background music (after user gesture if needed)
+    window.addEventListener('click', () => {
+      bgMusic.volume = 1.0;
+      bgMusic.play().catch(() => {});
+    }, { once: true });
   </script>
-</body> 
+</body>
 </html>
+
 
