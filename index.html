@@ -97,11 +97,9 @@
     </div>
   </div>
 
-  <!-- Background 8-bit music -->
-  <audio id="bg-music" src="8-bit-loop-music-290770.mp3" loop></audio>
-
-  <!-- Ding sound -->
-  <audio id="ding-sound" src="ding-126626.mp3"></audio>
+  <!-- Sounds -->
+  <audio id="bg-music" src="8-bit-loop-music-290770.mp3" loop preload="auto"></audio>
+  <audio id="ding-sound" src="ding-126626.mp3" preload="auto"></audio>
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -165,7 +163,7 @@
       usernameText.textContent = name;
     }
 
-    function fadeVolume(audio, from, to, duration = 500) {
+    function fadeVolume(audio, from, to, duration = 800) {
       const steps = 30;
       const stepTime = duration / steps;
       const delta = (to - from) / steps;
@@ -182,17 +180,25 @@
       commentEl.textContent = '';
       let i = 0;
 
-      // Fade out bg music and play ding
-      fadeVolume(bgMusic, bgMusic.volume, 0.1, 600);
+      // Play ding and THEN start 8-bit music smoothly
+      bgMusic.pause();
+      bgMusic.volume = 0;
+
       dingSound.currentTime = 0;
-      dingSound.play();
+      dingSound.play().then(() => {
+        // After ding ends (or about 800ms), start bg music
+        setTimeout(() => {
+          bgMusic.currentTime = 0;
+          bgMusic.play().catch(() => {});
+          fadeVolume(bgMusic, 0, 1.0, 1200);
+        }, 800);
+      }).catch(() => {});
 
       const typer = setInterval(() => {
         if (i < txt.length) {
           commentEl.textContent += txt[i++];
         } else {
           clearInterval(typer);
-          fadeVolume(bgMusic, bgMusic.volume, 1.0, 800); // fade back in
         }
       }, 50);
     }
@@ -216,16 +222,7 @@
       requestAnimationFrame(() => overlay.style.opacity = 1);
     }
 
-    // Firebase listener
     db.ref('latestComment').on('value', snap => render(snap.val()));
-
-    // Autoplay background music (after user gesture if needed)
-    window.addEventListener('click', () => {
-      bgMusic.volume = 1.0;
-      bgMusic.play().catch(() => {});
-    }, { once: true });
   </script>
 </body>
 </html>
-
-
