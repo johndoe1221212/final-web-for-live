@@ -28,17 +28,6 @@
       overflow: hidden;
     }
 
-    /* New container for left and right blocks */
-    #container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 90vw; /* Full width but with some margin */
-      height: 80vh; /* Adjusted height */
-      max-width: 1600px;
-    }
-
-    /* Left Side - Overlay */
     #overlay {
       position: relative;
       display: flex;
@@ -54,7 +43,6 @@
       opacity: 0;
       transition: opacity 0.6s ease;
       box-sizing: border-box;
-      font-size: 2em; /* Increased text size */
     }
 
     #avatar {
@@ -66,14 +54,14 @@
 
     #username {
       font-weight: 700;
-      font-size: 2em; /* Increased text size */
+      font-size: 1.6em;
       text-align: center;
       margin: 8px 0;
       animation: rainbow 6s linear infinite;
     }
 
     #comment {
-      font-size: 1.8em; /* Increased text size */
+      font-size: 1.4em;
       line-height: 1.5;
       text-align: center;
       display: -webkit-box;
@@ -115,48 +103,63 @@
       }
     }
 
-    /* Right Side - Better Chance block (Comic Sans & Bold only here) */
-    #right-text {
+    /* 👍 Better Chance block (Comic Sans & Bold only here) */
+    #right-text, #left-text {
       position: absolute;
-      right: 32px;
-      top: 50%;  /* Vertically centered */
-      transform: translateY(-50%);  /* Adjusted to center the block */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
       font-family: 'Comic Sans MS', cursive, sans-serif;
       font-weight: bold;
-      font-size: 2.5em; /* Increased text size */
+      font-size: 1.8em;
       color: white;
       text-shadow: 0 0 4px black;
       z-index: 10;
       user-select: none;
     }
 
-    #right-text .arrow {
-      font-size: 1.5em; /* Larger arrow */
+    #right-text {
+      right: 32px;
+      top: 10%;  /* Adjusted the position to appear above the background */
+      transform: translateY(0);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #left-text {
+      left: 32px;
+      top: 10%;  /* Adjusted the position to appear above the background */
+      transform: translateY(0);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #right-text .arrow, #left-text .arrow {
+      font-size: 1.2em; /* smaller arrow */
       margin: 2px 0;
     }
   </style>
 </head>
 <body>
-  <div id="container">
-    <!-- Left Side: Overlay -->
-    <div id="overlay">
-      <img id="avatar" src="" alt="avatar">
-      <div id="content">
-        <div id="username"><span id="username-text"></span></div>
-        <div id="comment"></div>
-      </div>
+  <div id="overlay">
+    <img id="avatar" src="" alt="avatar">
+    <div id="content">
+      <div id="username"><span id="username-text"></span></div>
+      <div id="comment"></div>
     </div>
+  </div>
+  
+  <div id="right-text">
+    👍
+    <div class="arrow">↓</div>
+    Better<br>
+    Chance
+  </div>
 
-    <!-- Right Side: Better Chance Text Block -->
-    <div id="right-text">
-      👍
-      <div class="arrow">↓</div>
-      Better<br>
-      Chance
-    </div>
+  <div id="left-text">
+    👍
+    <div class="arrow">↓</div>
+    Better<br>
+    Chance
   </div>
 
   <audio id="bg-music" src="hip-hop-drum-loop-ride-and-kick-beat-102-bpm-265596.mp3" loop preload="auto"></audio>
@@ -164,7 +167,6 @@
 
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-
   <script>
     firebase.initializeApp({
       apiKey: "AIzaSyByubdnNzRNASPIcswGJqNFd45cDWDs-xI",
@@ -196,8 +198,8 @@
       const r = commentEl.getBoundingClientRect();
       const x = r.left + Math.random() * (r.width - 1);
       const y = r.bottom + Math.random() * 20;
-      e.style.left = ${x}px;
-      e.style.top = ${y}px;
+      e.style.left = `${x}px`;
+      e.style.top = `${y}px`;
       requestAnimationFrame(() => {
         e.style.opacity = 1;
         e.style.transform = 'scale(1.2)';
@@ -253,26 +255,20 @@
     }
 
     function animAvatar() {
-      avatar.style.animation = ${Math.random() < 0.5 ? 'fadeA' : 'pulseA'} 10s ease-in-out infinite;
+      avatar.style.animation = `${Math.random() < 0.5 ? 'fadeA' : 'pulseA'} 10s ease-in-out infinite`;
     }
 
     function render(d) {
-      if (!d || !d.text) {
-        overlay.style.opacity = 0;
-        return;
-      }
-      avatar.src = d.avatar_url || 'default-avatar.jpg';
-      paintUsername(d.author);
-      paintComment(d.text);
+      if (!d) return;
+      paintUsername(d.username);
+      paintComment(d.comment);
       animAvatar();
-      startEmojiCycle();
-      requestAnimationFrame(() => overlay.style.opacity = 1);
     }
-
-    db.ref('latestComment').on('value', snap => render(snap.val()));
   </script>
 </body>
 </html>
+
+
 
 
 
