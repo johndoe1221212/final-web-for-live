@@ -157,7 +157,7 @@
       document.body.appendChild(e);
 
       const r = commentEl.getBoundingClientRect();
-      const x = r.left + Math.random() * r.width;
+      const x = r.left + Math.random() * (r.width - 1);
       const y = r.bottom + Math.random() * 20;
 
       e.style.left = `${x}px`;
