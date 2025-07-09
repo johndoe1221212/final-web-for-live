@@ -180,8 +180,8 @@
       const r = commentEl.getBoundingClientRect();
       const x = r.left + Math.random() * (r.width - 1);
       const y = r.bottom + Math.random() * 20;
-      e.style.left = ${x}px;
-      e.style.top = ${y}px;
+      e.style.left = `${x}px`;
+      e.style.top = `${y}px`;
       requestAnimationFrame(() => {
         e.style.opacity = 1;
         e.style.transform = 'scale(1.2)';
@@ -237,7 +237,7 @@
     }
 
     function animAvatar() {
-      avatar.style.animation = ${Math.random() < 0.5 ? 'fadeA' : 'pulseA'} 10s ease-in-out infinite;
+      avatar.style.animation = `${Math.random() < 0.5 ? 'fadeA' : 'pulseA'} 10s ease-in-out infinite`;
     }
 
     function render(d) {
@@ -257,6 +257,7 @@
   </script>
 </body>
 </html>
+
 
 
 
