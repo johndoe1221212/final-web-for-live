@@ -6,6 +6,13 @@
   <title>Live‑Chat Overlay (synced bg)</title>
 
   <style>
+    @font-face {
+      font-family: 'Moonshine';
+      src: url('https://fonts.gstatic.com/s/moonshiner/v1/abcdefg.woff2') format('woff2'); /* Replace with actual URL */
+      font-weight: bold;
+      font-style: normal;
+    }
+
     :root { --cycle-duration: 10s; }
 
     html, body {
@@ -14,9 +21,8 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: url('data:image/jpeg;base64,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') no-repeat center center;
+      background: url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/...') no-repeat center center;
       background-size: cover;
-
       font-family: Arial, Helvetica, sans-serif;
       -webkit-font-smoothing: antialiased;
       overflow: hidden;
@@ -29,11 +35,11 @@
       justify-content: center;
       align-items: center;
       padding: 16px;
-      max-width: 90vw; /* Flexible width */
-      width: 360px;    /* Fixed width for consistency */
-      height: 100%;     /* Takes 70% of screen height */
+      max-width: 90vw;
+      width: 360px;
+      height: 100%;
       border-radius: 18px;
-      background: rgba(13, 17, 23, 0.8); /* Slight transparency */
+      background: rgba(13, 17, 23, 0.8);
       opacity: 0;
       transition: opacity 0.6s ease;
       box-sizing: border-box;
@@ -66,14 +72,13 @@
       line-height: 1.5;
       text-align: center;
       display: -webkit-box;
-      -webkit-line-clamp: 3; /* Limit to 3 lines */
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
       word-break: break-word;
       margin-top: 8px;
     }
 
-    /* Rainbow color animation */
     @keyframes rainbow {
       0% { color: #FF3CAC; }
       14% { color: #784BA0; }
@@ -85,7 +90,6 @@
       100% { color: #FF3CAC; }
     }
 
-    /* Emoji Styles */
     .emoji {
       position: absolute;
       font-size: 1.5em;
@@ -93,20 +97,40 @@
       transition: opacity 1s ease-in-out, transform 1s ease-in-out;
     }
 
-    /* Smaller devices */
     @media (max-width: 480px) {
       #overlay {
-        width: 85vw;  /* More responsive width for smaller screens */
+        width: 85vw;
         height: 70%;
       }
-
       #username {
-        font-size: 1.3em;  /* Adjust text size */
+        font-size: 1.3em;
       }
-
       #comment {
         font-size: 1.1em;
       }
+    }
+
+    /* 👍 Better Chance block */
+    #right-text {
+      position: absolute;
+      right: 32px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: 'Moonshine', sans-serif;
+      font-weight: bold;
+      font-size: 1.8em;
+      color: white;
+      text-shadow: 0 0 4px black;
+      z-index: 10;
+      user-select: none;
+    }
+
+    #right-text .arrow {
+      font-size: 2em;
+      margin: 4px 0;
     }
   </style>
 </head>
@@ -119,11 +143,16 @@
     </div>
   </div>
 
-  <!-- Sounds -->
+  <div id="right-text">
+    👍
+    <div class="arrow">↓</div>
+    Better
+    Chance
+  </div>
+
   <audio id="bg-music" src="hip-hop-drum-loop-ride-and-kick-beat-102-bpm-265596.mp3" loop preload="auto"></audio>
   <audio id="ding-sound" src="ding-126626.mp3" preload="auto"></audio>
 
-  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
@@ -139,38 +168,33 @@
     });
 
     const db = firebase.database();
-
-    const overlay      = document.getElementById('overlay'),
-          avatar       = document.getElementById('avatar'),
+    const overlay = document.getElementById('overlay'),
+          avatar = document.getElementById('avatar'),
           usernameText = document.getElementById('username-text'),
-          commentEl    = document.getElementById('comment'),
-          bgMusic      = document.getElementById('bg-music'),
-          dingSound    = document.getElementById('ding-sound');
+          commentEl = document.getElementById('comment'),
+          bgMusic = document.getElementById('bg-music'),
+          dingSound = document.getElementById('ding-sound');
 
     const emojis = ['😂','❤️','💯','🔥','👍','😯','😭','🗿','❤️‍🔥','😎','👀'];
     let emojiInterval = null;
 
     function generateEmoji() {
       document.querySelectorAll('.emoji').forEach(el => el.remove());
-
       const e = document.createElement('span');
       e.className = 'emoji';
       e.textContent = emojis[Math.floor(Math.random() * emojis.length)];
       document.body.appendChild(e);
-
       const r = commentEl.getBoundingClientRect();
       const x = r.left + Math.random() * (r.width - 1);
       const y = r.bottom + Math.random() * 20;
-
       e.style.left = `${x}px`;
-      e.style.top  = `${y}px`;
-
+      e.style.top = `${y}px`;
       requestAnimationFrame(() => {
-        e.style.opacity   = 1;
+        e.style.opacity = 1;
         e.style.transform = 'scale(1.2)';
       });
       setTimeout(() => {
-        e.style.opacity   = 0;
+        e.style.opacity = 0;
         e.style.transform = 'scale(0.8)';
       }, 2000);
       setTimeout(() => e.remove(), 3000);
@@ -190,7 +214,6 @@
       const stepTime = duration / steps;
       const delta = (to - from) / steps;
       let current = 0;
-
       const interval = setInterval(() => {
         current++;
         audio.volume = Math.min(1, Math.max(0, from + delta * current));
@@ -201,21 +224,16 @@
     function paintComment(txt='') {
       commentEl.textContent = '';
       let i = 0;
-
-      // Play ding and THEN start 8-bit music smoothly
       bgMusic.pause();
       bgMusic.volume = 0;
-
       dingSound.currentTime = 0;
       dingSound.play().then(() => {
-        // After ding ends (or about 800ms), start bg music
         setTimeout(() => {
           bgMusic.currentTime = 0;
           bgMusic.play().catch(() => {});
           fadeVolume(bgMusic, 0, 1.0, 1200);
         }, 800);
       }).catch(() => {});
-
       const typer = setInterval(() => {
         if (i < txt.length) {
           commentEl.textContent += txt[i++];
@@ -234,13 +252,11 @@
         overlay.style.opacity = 0;
         return;
       }
-
       avatar.src = d.avatar_url || 'default-avatar.jpg';
       paintUsername(d.author);
       paintComment(d.text);
       animAvatar();
       startEmojiCycle();
-
       requestAnimationFrame(() => overlay.style.opacity = 1);
     }
 
@@ -248,4 +264,5 @@
   </script>
 </body>
 </html>
+
 
